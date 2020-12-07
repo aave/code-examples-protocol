@@ -5,6 +5,12 @@ import { FlashLoanReceiverBase } from "FlashLoanReceiverBase.sol";
 import { ILendingPool, ILendingPoolAddressesProvider, IERC20 } from "Interfaces.sol";
 import { SafeMath } from "Libraries.sol";
 
+/** 
+    !!!
+    Never keep funds permanently on your FlashLoanReceiverBase contract as they could be 
+    exposed to a 'griefing' attack, where the stored funds are used by an attacker.
+    !!!
+ */
 contract MyV2FlashLoan is FlashLoanReceiverBase {
     using SafeMath for uint256;
 
@@ -38,7 +44,7 @@ contract MyV2FlashLoan is FlashLoanReceiverBase {
         // Approve the LendingPool contract allowance to *pull* the owed amount
         for (uint i = 0; i < assets.length; i++) {
             uint amountOwing = amounts[i].add(premiums[i]);
-            IERC20(assets[i]).approve(address(_lendingPool), amountOwing);
+            IERC20(assets[i]).approve(address(LENDING_POOL), amountOwing);
         }
 
         return true;
@@ -79,7 +85,7 @@ contract MyV2FlashLoan is FlashLoanReceiverBase {
         bytes memory params = "";
         uint16 referralCode = 0;
 
-        _lendingPool.flashLoan(
+        LENDING_POOL.flashLoan(
             receiverAddress,
             assets,
             amounts,
